@@ -13,8 +13,8 @@ type config struct {
 	Port           int                   `config:"port"`
 	MaxRetries     int                   `config:"max_retries"`
 	SyslogProgram  string                `config:"default_syslog_program"`
-	SyslogPriority int64                 `config:"default_syslog_priority"`
-	SyslogSeverity int64                 `config:"default_syslog_program"`
+	SyslogPriority uint64                `config:"default_syslog_priority"`
+	SyslogSeverity uint64                `config:"default_syslog_program"`
 	TLS            *outputs.TLSConfig    `config:"tls"`
 	Timeout        time.Duration         `config:"timeout"`
 	Proxy          transport.ProxyConfig `config:",inline"`

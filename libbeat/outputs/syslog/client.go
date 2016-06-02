@@ -20,12 +20,12 @@ var (
 type client struct {
 	*transport.Client
 	SyslogProgram  string
-	SyslogPriority int64
-	SyslogSeverity int64
+	SyslogPriority uint64
+	SyslogSeverity uint64
 	Hostname       string
 }
 
-func newClient(tc *transport.Client, prog string, pri int64, sev int64) *client {
+func newClient(tc *transport.Client, prog string, pri uint64, sev uint64) *client {
 	// hostname only needs to be set once.
 	// It's already set in the event by the publisher, but it doesn't make
 	// sense to waste CPU extracting it from there for each event, when it's
@@ -74,8 +74,8 @@ func (c *client) CreateSyslogString(event common.MapStr) (string, error) {
 	ts := time.Time(event["@timestamp"].(common.Time)).UTC().Format(time.RFC3339)
 
 	var local_prog string = c.SyslogProgram
-	var local_pri int64 = c.SyslogPriority
-	var local_sev int64 = c.SyslogSeverity
+	var local_pri uint64 = c.SyslogPriority
+	var local_sev uint64 = c.SyslogSeverity
 
 	// Check for overrides from the event, if event["fields"] exists
 	if _, ok := event["fields"]; ok {
@@ -86,12 +86,12 @@ func (c *client) CreateSyslogString(event common.MapStr) (string, error) {
 
 		// A value for priority may have been supplied in the config.
 		if priority_num, ok := event["fields"].(common.MapStr)["priority"]; ok {
-			local_pri = priority_num.(int64)
+			local_pri = priority_num.(uint64)
 		}
 
 		// A value for severity may have been supplied in the config.
 		if severity_num, ok := event["fields"].(common.MapStr)["severity"]; ok {
-			local_sev = severity_num.(int64)
+			local_sev = severity_num.(uint64)
 		}
 	}
 
