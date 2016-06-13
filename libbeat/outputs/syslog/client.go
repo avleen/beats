@@ -86,12 +86,24 @@ func (c *client) CreateSyslogString(event common.MapStr) (string, error) {
 
 		// A value for priority may have been supplied in the config.
 		if priority_num, ok := event["fields"].(common.MapStr)["priority"]; ok {
-			local_pri = priority_num.(uint64)
+			// If "priority" in the config is 0 (for kernel
+			// messages), we get the following panic:
+			//  panic: interface conversion: interface is int64, not uint64
+			// If we change the code to assert int64 rather than
+			// uint64, the panic becomes:
+			//  panic: interface conversion: interface is uint64, not int64
+			// This is ridiculous, so we'll just assume the source
+			// is int64, and convert to unit64. If that fails, the
+			// source number was probably out of bounds anyway for
+			// valid syslog priorities.
+			local_pri = uint64(priority_num.(int64))
 		}
 
 		// A value for severity may have been supplied in the config.
 		if severity_num, ok := event["fields"].(common.MapStr)["severity"]; ok {
-			local_sev = severity_num.(uint64)
+			// See note above, on why we assert int64 and then
+			// convert to unit64
+			local_sev = uint64(severity_num.(int64))
 		}
 	}
 
