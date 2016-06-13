@@ -92,18 +92,28 @@ func (c *client) CreateSyslogString(event common.MapStr) (string, error) {
 			// If we change the code to assert int64 rather than
 			// uint64, the panic becomes:
 			//  panic: interface conversion: interface is uint64, not int64
-			// This is ridiculous, so we'll just assume the source
-			// is int64, and convert to unit64. If that fails, the
-			// source number was probably out of bounds anyway for
-			// valid syslog priorities.
-			local_pri = uint64(priority_num.(int64))
+			// This is ridiculous, and we tried to do:
+			//  uint64(priority_num.(int64)
+			// which also *sometimes* fails with a panic. So now we
+			// have to blindly set it to at least 0 if the assertion
+			// fails.
+			pri, pri_success := priority_num.(uint64)
+			if pri_success != true {
+				local_pri = 0
+			} else {
+				local_pri = pri
+			}
 		}
 
 		// A value for severity may have been supplied in the config.
 		if severity_num, ok := event["fields"].(common.MapStr)["severity"]; ok {
-			// See note above, on why we assert int64 and then
-			// convert to unit64
-			local_sev = uint64(severity_num.(int64))
+			// See note above, on why we assert like this.
+			sev, sev_success := severity_num.(uint64)
+			if sev_success != true {
+				local_sev = 0
+			} else {
+				local_sev = sev
+			}
 		}
 	}
 
